@@ -11,7 +11,7 @@ output:
     theme: default
     number_sections: true                   # add section numbering to headers
     df_print: paged                         # tables are printed as an html table with support for pagination over rows and columns
-    css: ./corp-styles.css
+    css: ./qbic-style.css
     highlight: pygments
     pdf_document: true
 ---
@@ -32,7 +32,6 @@ library(limma)
 library(cowplot)
 library(knitr)
 library(kableExtra)
-library(viridis)
 devtools::install_github('satijalab/seurat-data')
 library(SeuratData)
 
@@ -79,20 +78,7 @@ Brief description of the project.
 Loading all the individual samples. Print sample summary if possible (e.g. metadata sheet).
 
 ```{r , echo=FALSE}
-# Reading your own data:
-
-# # For multiple samples:
-# files <- c("../data/cellranger_count/sample-Lib_20094a002L2_01/outs/filtered_feature_bc_matrix/", 
-#           "../data/cellranger_count/sample-Lib_20094a003L2_01/outs/filtered_feature_bc_matrix/")
-
-# seurat_list <- list()
-# # Initialize the Seurat object with the raw (non-normalized data).
-# for (i in c(1:length(ids))) {
-#     seurat_data <- Read10X(data.dir = files[i])
-#     seurat_obj <- CreateSeuratObject(counts = seurat_data, project = ids[i])
-#     seurat_list <- append(seurat_list, seurat_obj)
-# }
-
+# Load your own data (e.g. in data/)
 # Here we load example data:
 InstallData("pbmc3k")
 pbmc <- pbmc3k
@@ -125,7 +111,7 @@ Calculating the percentage of genes mapping to mitochondrial genome for QC:
 
 ```{r, echo=FALSE}
 # CAREFUL: for mouse data pattern is "^mt-" and for human data, pattern is "^MT-"
-pbmc$percent.mt <- PercentageFeatureSet(samples.all, pattern = "^MT-")
+pbmc$percent.mt <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 ```
 
 Visualization of the QC metrics:
@@ -212,8 +198,8 @@ top10 <- head(VariableFeatures(pbmc), 10)
 
 # plot variable features with and without labels
 plot1 <- VariableFeaturePlot(pbmc)
-plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
-plot1 + plot2
+plot2 <- LabelPoints(plot=plot1, points = top10, repel = TRUE)
+plot2
 ```
 
 
@@ -243,23 +229,23 @@ ElbowPlot(pbmc)
 
 ## Clustering the cells
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 pbmc <- FindNeighbors(pbmc, dims = 1:10)
 pbmc <- FindClusters(pbmc, resolution = 0.5)
 ```
 
 ## Run non-linear dimensionality reduction
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 pbmc <- RunUMAP(pbmc, dims = 1:10)
 ```
 
 ```{r fig.height=5, fig.width=10, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
-umap_clusters <- DimPlot(pbmc, reduction = "umap")
+umap_clusters <- DimPlot(pbmc, reduction = "umap", label = TRUE) + NoLegend()
 umap_clusters
 
-ggsave(paste0(results_folder,"correlation_molecule_genes.png"), umap_clusters, device="png", width = 25, height = 8, units = "cm")
-ggsave(paste0(results_folder,"correlation_molecule_genes.pdf"), umap_clusters, device="pdf", width = 25, height = 8, units = "cm")
+ggsave(paste0(results_folder,"umap_clusters.png"), umap_clusters, device="png", width = 25, height = 8, units = "cm")
+ggsave(paste0(results_folder,"umap_clusters.pdf"), umap_clusters, device="pdf", width = 25, height = 8, units = "cm")
 
 ```
 
@@ -291,7 +277,6 @@ ggsave(paste0(results_folder,"markers/dotplot_genes_csf_paper.pdf"), dotplot, de
 ```{r fig.height=15, fig.width=10, echo=FALSE, warning=FALSE, results="hide"}
 gene_features <- FeaturePlot(pbmc, 
                             features = genes_paper2, 
-                            reduction = "ref.umap",
                             ncol = 3)
 gene_features
 ggsave(paste0(results_folder,"markers/feature_plot_marker_genes.png"), gene_features, device="png", width = 20, height = 25, units = "cm")
@@ -307,3 +292,7 @@ ggsave(paste0(results_folder,"markers/feature_plot_marker_genes.pdf"), gene_feat
 
 For the single-cell data analysis the R package Seurat v`r packageVersion("Seurat")` was employed. Graphs were produced in RStudio with `r R.version.string` mainly using the `R` package ggplot2 v`r packageVersion("ggplot2")`. Final reports were produced using the `R` package rmarkdown v`r packageVersion("rmarkdown")`, with knitr v`r packageVersion("knitr")`.
 
+Package versions:
+```{r, echo=F}
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"]
+```

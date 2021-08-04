@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.8"
 services:
   rstudio:
     build: .
@@ -10,12 +10,10 @@ services:
         - "8889:8787"
     volumes:
       # mount conda env into exactly the same path as on the host system - some paths are hardcoded in the env.
-      - /home/centos/anaconda3/envs/R400:/home/centos/anaconda3/envs/R400
-      # Share settings between rstudio instances
-      - /home/centos/.local/share/rstudio/monitored/user-settings:/root/.local/share/rstudio/monitored/user-settings
+      - /home/centos/.conda/envs/seurat-knitr:/home/centos/.conda/envs/seurat-knitr
       # mount the working directory containing your R project.
-      - /home/centos/projects:/root/projects
+      - /home/centos/r-project-template:/home/rstudio
     environment:
       - PASSWORD=notsafe
       # repeat the path of the conda environment
-      - CONDAENV=/home/sturm/anaconda3/envs/R400
+      - CONDAENV=/home/centos/.conda/envs/seurat-knitr

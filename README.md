@@ -4,8 +4,13 @@ R project template
 
 ## Running Rstudio Server with Docker on deNBI cloud
 
-Credits: This setup is based on the setup described by [@grst](github.com/grst) on [how to run an Rstudio server in a conda environment with docker](https://github.com/grst/rstudio-server-conda).
+Clone this repository
 
+```bash
+git clone https://github.com/qbic-projects/r-project-template.git
+```
+
+Credits: This setup for rstudio server using docker-copose is based on the setup described by [@grst](github.com/grst) on [how to run an Rstudio server in a conda environment with docker](https://github.com/grst/rstudio-server-conda).
 ### deNBI instance setup
 
 Launch a deNBI instance with the following characteristics:
@@ -22,7 +27,13 @@ Log into the instance using the IP address as host name (user name is `centos`).
 
 > If you expect to need more than 20GB of space, mount a cynder volume on the instance.
 
-#### Install the required software
+### Install the required software
+
+Start by cloning this repository:
+
+```bash
+git clone https://github.com/qbic-projects/r-project-template.git
+```
 
 To run the Rstudio server via docker we will require:
 
@@ -52,7 +63,7 @@ Then run the `install_docker_conda.yml` ansible playbook in this repository:
 ansible-playbook install_docker_conda.yml
 ```
 
-Source once the `~/.bashrc` file or log out and log in again:
+Source once the `~/.bashrc` file or log out and log in again.
 
 Verify docker installation:
 
@@ -69,22 +80,25 @@ sudo usermod -aG docker $USER
 
 Then log out and log back into the instance.
 
-### Usage
+### Start up rstudio server
 
-1. Clone this repository
+1. Build the rstudio container (fetches the latest version of [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio) and adds some custom scripts)
 
-   ```bash
-   git clone git@github.com:qbic-projects/r-project-template.git
-   ```
-
-2. Build the rstudio container (fetches the latest version of [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio) and adds some custom scripts)
+   You can adapt the container name inside the docker-compose.yml file.
 
    ```bash
-   cd rstudio-server-conda/docker
+   cd r-project-template/rstudio-server-docker
    docker-compose build     
    ```
 
-3. Copy the docker-compose.yml file into your project directory and adjust the paths.
+2. Add the necessary dependencies in the `code/environment.yml` file and create the conda environment. Don't add rstudio in the environment file, this is already inside the container:
+
+   ```bash
+   cd code
+   conda env create -f environment.yml
+   ```
+
+3. Update if necessary the `docker-compose.yml` file to your project paths and conda environment name.
 
    You may want to add additional volumes with your data.
 
@@ -94,17 +108,15 @@ Then log out and log back into the instance.
          # port on the host : port in the container (the latter is always 8787)
          - "8889:8787"
        volumes:
-         # mount conda env into exactely the same path as on the host system - some paths are hardcoded in the env.
-         - /home/sturm/anaconda3/envs/R400:/home/sturm/anaconda3/envs/R400
-         # Share settings between rstudio instances
-         - /home/sturm/.local/share/rstudio/monitored/user-settings:/root/.local/share/rstudio/monitored/user-settings
+         # mount conda env into exactly the same path as on the host system - some paths are hardcoded in the env.
+         - /home/centos/.conda/envs/seurat-knitr:/home/centos/.conda/envs/seurat-knitr
          # mount the working directory containing your R project.
-         - /home/sturm/projects:/projects
+         - /home/centos/r-project-template:/home/rstudio
        environment:
          # password used for authentication
          - PASSWORD=notsafe
          # repeat the path of the conda environment (must be identical to the path in "volumes")
-         - CONDAENV=/home/sturm/anaconda3/envs/R400
+         - CONDAENV=/home/centos/.conda/envs/seurat-knitr
    ```
 
 4. Run your project-specific instance of Rstudio-server
@@ -115,7 +127,8 @@ Then log out and log back into the instance.
 
 5. Log into Rstudio
 
- * Open your server at `http://localhost:8889` (or whatever port you specified)
- * Login with the user `rstudio` (when using Docker) or `root` (when using Podman) and the password you specified 
-   in the `docker-compose.yml`. If you are using Podman and login with `rstudio` you won't have permissions to 
-   access the mounted volumes. 
+   * Open your server at `http://localhost:8889` (or whatever port you specified)
+   * Login with the user `rstudio` and the password you specified 
+   in the `docker-compose.yml`.
+
+6. Browse into the `code` folder and update the code as necessary. Once finished, make sure to push the changes to a new repository.
