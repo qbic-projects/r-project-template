@@ -4,13 +4,6 @@ R project template
 
 ## Running Rstudio Server with Docker on deNBI cloud
 
-Clone this repository
-
-```bash
-git clone https://github.com/qbic-projects/r-project-template.git
-```
-
-Credits: This setup for rstudio server using docker-copose is based on the setup described by [@grst](github.com/grst) on [how to run an Rstudio server in a conda environment with docker](https://github.com/grst/rstudio-server-conda).
 ### deNBI instance setup
 
 Launch a deNBI instance with the following characteristics:
@@ -132,3 +125,5 @@ Then log out and log back into the instance.
    in the `docker-compose.yml`.
 
 6. Browse into the `code` folder and update the code as necessary. Once finished, make sure to push the changes to a new repository.
+
+Credits: This setup for rstudio server using docker-compose is based on the setup described by [@grst](github.com/grst) on [how to run an Rstudio server in a conda environment with docker](https://github.com/grst/rstudio-server-conda).
