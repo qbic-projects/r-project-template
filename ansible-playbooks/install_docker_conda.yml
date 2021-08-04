@@ -1,0 +1,13 @@
+- hosts: localhost
+  become: true
+  roles:
+    - role: geerlingguy.docker
+      docker_users:
+        - centos
+    - role: robinandeer.miniconda
+- hosts: localhost
+  tasks:
+    - name: add conda to path
+      lineinfile:
+        dest: /home/centos/.bashrc
+        line: export PATH="$PATH":/usr/local/anaconda/condabin

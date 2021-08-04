@@ -18,13 +18,56 @@ Launch a deNBI instance with the following characteristics:
 * Key Pair: add your SSH key or generate a new one.
 * (Leave default in the rest of the fields)
 
-Log into the instance.
+Log into the instance using the IP address as host name (user name is `centos`).
 
-Install the following software:
+> If you expect to need more than 20GB of space, mount a cynder volume on the instance.
+
+#### Install the required software
+
+To run the Rstudio server via docker we will require:
 
 * [Docker](https://www.docker.com/)
 * [docker-compose](https://github.com/docker/compose)
 * [conda](https://docs.conda.io/en/latest/miniconda.html) or [mamba](https://github.com/conda-forge/miniforge#mambaforge)
+
+This can be installed via ansible. Install ansible and other necessary software via yum:
+
+```bash
+sudo yum install epel-release -y
+sudo yum install ansible -y
+sudo yum install vim -y
+sudo yum install git -y
+```
+
+Install necessary ansible roles (for docker, docker-compose and miniconda):
+
+```bash
+ansible-galaxy install geerlingguy.docker
+ansible-galaxy install andrewrothstein.miniconda
+```
+
+Then run the `install_docker_conda.yml` ansible playbook in this repository:
+
+```bash
+ansible-playbook install_docker_conda.yml
+```
+
+Source once the `~/.bashrc` file or log out and log in again:
+
+Verify docker installation:
+
+```bash
+sudo docker run hello-world
+```
+
+Post installation steps:
+
+```bash
+sudo groupadd docker
+sudo usermod -aG docker $USER
+```
+
+Then log out and log back into the instance.
 
 ### Usage
 
