@@ -1,0 +1,309 @@
+---
+title: "Single-cell RNAseq analysis"
+subtitle: "CSF isolated immune cells"
+author: "Gisela Gabernet"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  html_document:
+    toc: true                               # table of contents
+    toc_float: true                        # float the table of contents to the left of the main document content
+    toc_depth: 3                            # header levels 1,2,3
+    theme: default
+    number_sections: true                   # add section numbering to headers
+    df_print: paged                         # tables are printed as an html table with support for pagination over rows and columns
+    css: ./corp-styles.css
+    highlight: pygments
+    pdf_document: true
+---
+
+<!-- QBiC Logo -->
+<img src="./QBiCLogo.png" style="position:absolute;top:0px;right:0px;" height="120" width="120" />
+<div class="watermark">QBiC</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Import all R libraries
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(forcats)
+library(ggplot2)
+library(limma)
+library(cowplot)
+library(knitr)
+library(kableExtra)
+library(viridis)
+devtools::install_github('satijalab/seurat-data')
+library(SeuratData)
+
+theme_set(theme_classic())
+results_folder <- "results/"
+dir.create(results_folder)
+```
+
+**Project Members:** 
+
+
+\
+
+***Member 1***
+
+
+\
+
+***Member 2***
+
+
+\
+
+
+\
+\
+**QBiC contacts:**
+
+Name Surname
+
+Bioinformatics project manager
+
+name.surname@qbic.uni-tuebingen.de
+
+
+***
+
+# Introduction
+
+Brief description of the project.
+
+# Loading the dataset
+
+Loading all the individual samples. Print sample summary if possible (e.g. metadata sheet).
+
+```{r , echo=FALSE}
+# Reading your own data:
+
+# # For multiple samples:
+# files <- c("../data/cellranger_count/sample-Lib_20094a002L2_01/outs/filtered_feature_bc_matrix/", 
+#           "../data/cellranger_count/sample-Lib_20094a003L2_01/outs/filtered_feature_bc_matrix/")
+
+# seurat_list <- list()
+# # Initialize the Seurat object with the raw (non-normalized data).
+# for (i in c(1:length(ids))) {
+#     seurat_data <- Read10X(data.dir = files[i])
+#     seurat_obj <- CreateSeuratObject(counts = seurat_data, project = ids[i])
+#     seurat_list <- append(seurat_list, seurat_obj)
+# }
+
+# Here we load example data:
+InstallData("pbmc3k")
+pbmc <- pbmc3k
+```
+
+Merging all samples in the dataset. The table represents the number of cells that are available for each sample.
+
+```{r, echo=FALSE}
+# For multiple samples:
+# samples.all <- merge(seurat_list[[1]], y = c(seurat_list[[2]]), 
+#                   #add.cell.ids = c("S1","S2"), 
+#                   add.cell.ids = c("S1"),
+#                   project = "SC_CSF")
+# samples.all <- seurat_list[[1]]
+```
+
+
+# Standard pre-processing workflow
+
+Important QC params for eliminating bad quality cells (could be droplets without cells) are:
+
+* Number of unique genes detected in each cell
+* Total number of molecules detected within a cell
+
+Calculating the percentage of genes mapping to mitochondrial genome for QC:
+
+*  Low-quality / dying cells often exhibit extensive mitochondrial contamination
+* We calculate mitochondrial QC metrics with the PercentageFeatureSet function, which calculates the percentage of counts originating from a set of features
+* We use the set of all genes starting with mt- as a set of mitochondrial genes
+
+```{r, echo=FALSE}
+# CAREFUL: for mouse data pattern is "^mt-" and for human data, pattern is "^MT-"
+pbmc$percent.mt <- PercentageFeatureSet(samples.all, pattern = "^MT-")
+```
+
+Visualization of the QC metrics:
+
+* recommended to filter out the cells that have unique feature counts over 2500 or less than 200
+* recommended to filter out cells that have >10% mitochondrial counts
+
+```{r, fig.height=3.5, fig.width=7, fig.align="center", echo=FALSE}
+metadata <- pbmc@meta.data
+vln1 <- ggplot(data = metadata, aes(x=orig.ident, y=nCount_RNA, fill=orig.ident)) +
+    geom_violin() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    xlab("") + ylab("") + ggtitle("Molecules / cell") +
+    NoLegend()
+vln2 <- ggplot(data = metadata, aes(x=orig.ident, y=nFeature_RNA, fill=orig.ident)) +
+    geom_violin() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    xlab("") + ylab("") + ggtitle("Genes / cell") +
+    NoLegend()
+vln3 <- ggplot(data = metadata, aes(x=orig.ident, y=percent.mt, fill=orig.ident)) +
+    geom_violin() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) + 
+    xlab("") + ylab("") + ggtitle("% mitochondrial") +
+    NoLegend()
+qc_vln <- vln1 + vln2 + vln3
+qc_vln
+ggsave(paste0(results_folder,"quality_violin_plot.png"), qc_vln, device="png", width = 25, height = 8, units = "cm")
+ggsave(paste0(results_folder,"quality_violin_plot.pdf"), qc_vln, device="pdf", width = 25, height = 8, units = "cm")
+```
+
+
+```{r, fig.height=4, fig.width=7, fig.align="center", echo=FALSE}
+### GenePlot(object = seurat, gene1 = ?, gene2 = ?)
+corr <- FeatureScatter(object = pbmc, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+corr
+ggsave(paste0(results_folder,"correlation_molecule_genes.png"), corr, device="png", width = 25, height = 8, units = "cm")
+ggsave(paste0(results_folder,"correlation_molecule_genes.pdf"), corr, device="pdf", width = 25, height = 8, units = "cm")
+```
+
+```{r, fig.height=4, fig.width=7, fig.align="center", echo=FALSE}
+### GenePlot(object = seurat, gene1 = ?, gene2 = ?)
+pbmc@meta.data$gene_count_rank <- rank(1/pbmc@meta.data$nFeature_RNA)
+ggplot(data = pbmc@meta.data, aes(y=nFeature_RNA, x=gene_count_rank)) +
+    geom_point() + 
+    xlab("") + ylab("Genes / cell")
+```
+
+## Filtering out low quality cells
+
+Low quality cells need to be filtered out:
+
+* Filtering out the cells that have unique feature counts over 2500 or less than 200
+* Filtering out cells that have >5% mitochondrial counts
+
+After filtering low quality cells, the cell numbers per sample are the following:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+cells_per_sample = pbmc@meta.data$orig.ident
+
+```
+
+```{r echo=FALSE}
+tab <- as.data.frame(table(cells_per_sample))
+colnames(tab) <- c("Condition", "Cell_number")
+kable(tab) %>%
+    kable_styling("hover")
+```
+
+# Data normalization and clustering
+
+## Data normalization
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- NormalizeData(pbmc, normalization.method = "LogNormalize", scale.factor = 10000)
+```
+
+Sample variable features: 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+
+# Identify the 10 most highly variable genes
+top10 <- head(VariableFeatures(pbmc), 10)
+
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(pbmc)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc)
+```
+
+## PCA analysis
+
+Perform linear dimensionality reduction on the variable features.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+print(pbmc[["pca"]], dims = 1:5, nfeatures = 5)
+```
+
+Visualizing the loadings
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+VizDimLoadings(pbmc, dims = 1:2, reduction = "pca")
+```
+
+Visualizing the elbow plot
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ElbowPlot(pbmc)
+```
+
+## Clustering the cells
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- FindNeighbors(pbmc, dims = 1:10)
+pbmc <- FindClusters(pbmc, resolution = 0.5)
+```
+
+## Run non-linear dimensionality reduction
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pbmc <- RunUMAP(pbmc, dims = 1:10)
+```
+
+```{r fig.height=5, fig.width=10, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+umap_clusters <- DimPlot(pbmc, reduction = "umap")
+umap_clusters
+
+ggsave(paste0(results_folder,"correlation_molecule_genes.png"), umap_clusters, device="png", width = 25, height = 8, units = "cm")
+ggsave(paste0(results_folder,"correlation_molecule_genes.pdf"), umap_clusters, device="pdf", width = 25, height = 8, units = "cm")
+
+```
+
+# Plotting cell type markers
+
+All marker plots in this section can be found under [results/markers](./results/data/markers).
+
+## Markers described in the literature
+
+DotPlot from genes in the Nature communications CSF paper.
+
+```{r fig.height=5, fig.width=10, echo=FALSE, warning=FALSE, results="hide"}
+dir.create(paste0(results_folder,"markers"))
+genes_paper2 <- c("CD3E", "CD4", "IL7R", "CD8B", "CCR7", "FOXP3", "TRDC", "GNLY", "CD79A", "IGHD", "CD27", "CD38", "LYZ", "WDFY4", "CD14", "TCF4")
+dotplot <- DotPlot(pbmc, 
+                    features = genes_paper2, 
+                    dot.scale = 4,
+                    dot.min = 0.1) + 
+    scale_color_viridis(option="D") +
+    RotatedAxis() + 
+    theme(legend.position = "right") + 
+    xlab("genes") + ylab("Clusters")
+dotplot
+ggsave(paste0(results_folder,"markers/dotplot_genes_csf_paper.png"), dotplot, device="png", width = 21, height = 12, units = "cm")
+ggsave(paste0(results_folder,"markers/dotplot_genes_csf_paper.pdf"), dotplot, device="pdf", width = 21, height = 12, units = "cm")
+
+```
+
+```{r fig.height=15, fig.width=10, echo=FALSE, warning=FALSE, results="hide"}
+gene_features <- FeaturePlot(pbmc, 
+                            features = genes_paper2, 
+                            reduction = "ref.umap",
+                            ncol = 3)
+gene_features
+ggsave(paste0(results_folder,"markers/feature_plot_marker_genes.png"), gene_features, device="png", width = 20, height = 25, units = "cm")
+ggsave(paste0(results_folder,"markers/feature_plot_marker_genes.pdf"), gene_features, device="pdf", width = 20, height = 25, units = "cm")
+```
+
+
+```{r echo=FALSE, warning=FALSE, results="hide", message=F, warning=F}
+#SaveH5Seurat(samples.all, filename = paste0("MS_sample_",Sys.Date(),".h5Seurate"), overwrite = TRUE)
+````
+
+# Methods
+
+For the single-cell data analysis the R package Seurat v`r packageVersion("Seurat")` was employed. Graphs were produced in RStudio with `r R.version.string` mainly using the `R` package ggplot2 v`r packageVersion("ggplot2")`. Final reports were produced using the `R` package rmarkdown v`r packageVersion("rmarkdown")`, with knitr v`r packageVersion("knitr")`.
+
