@@ -121,8 +121,7 @@ Then log out and log back into the instance.
 5. Log into Rstudio
 
    * Open your server at `http://localhost:8889` (or whatever port you specified)
-   * Login with the user `rstudio` and the password you specified 
-   in the `docker-compose.yml`.
+   * Login with the user `rstudio` and the password you specified in the `docker-compose.yml`.
 
 6. Browse into the `code` folder and update the code as necessary. Once finished, make sure to push the changes to a new repository.
 
