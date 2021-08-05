@@ -1,3 +1,7 @@
 results/*
 data/*
 !data/readme.md
+.Renviron
+.config/*
+.local/*
+code/results/*
