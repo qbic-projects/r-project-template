@@ -4,7 +4,7 @@
     - role: geerlingguy.docker
       docker_users:
         - centos
-    - role: robinandeer.miniconda
+    - role: andrewrothstein.miniconda
 - hosts: localhost
   tasks:
     - name: add conda to path
