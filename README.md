@@ -4,6 +4,8 @@ R project template
 
 ## Running Rstudio Server with Docker on deNBI cloud
 
+Start by creating a repository within `qbic-projects` from this template. For this, use the button: `Use this template`.
+
 ### deNBI instance setup
 
 Launch a deNBI instance with the following characteristics:
@@ -21,12 +23,6 @@ Log into the instance using the IP address as host name (user name is `centos`).
 > If you expect to need more than 20GB of space, mount a cynder volume on the instance.
 
 ### Install the required software
-
-Start by cloning this repository:
-
-```bash
-git clone https://github.com/qbic-projects/r-project-template.git
-```
 
 To run the Rstudio server via docker we will require:
 
