@@ -18,6 +18,10 @@ Launch a deNBI instance with the following characteristics:
 * Key Pair: add your SSH key or generate a new one.
 * (Leave default in the rest of the fields)
 
+You will also need to create and attach a volume. There are step by step instructions for creating instances and attaching volumes on the [qbic pipeline docs page](https://pipeline-docs.readthedocs.io/en/latest/markdown/clusters/denbi_cloud.html).
+
+You should do your work and computations within the mounted volume path. You can also clone your newly created repository there.
+
 Log into the instance using the IP address as host name (user name is `centos`).
 
 > If you expect to need more than 20GB of space, mount a cynder volume on the instance.
