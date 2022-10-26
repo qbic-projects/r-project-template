@@ -54,6 +54,10 @@ ansible-playbook install_docker_conda.yml
 
 Source once the `~/.bashrc` file or log out and log in again.
 
+```bash
+source ~/.bashrc
+```
+
 Verify docker installation:
 
 ```bash
