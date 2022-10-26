@@ -33,10 +33,7 @@ To run the Rstudio server via docker we will require [Docker](https://www.docker
 This can be installed via ansible. Install ansible and other necessary software via yum:
 
 ```bash
-sudo yum install epel-release -y
-sudo yum install ansible -y
-sudo yum install vim -y
-sudo yum install git -y
+sudo yum install epel-release ansible vim git wget -y
 ```
 
 Install necessary ansible roles (for docker, docker-compose and miniconda):
