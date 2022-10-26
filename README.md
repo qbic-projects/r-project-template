@@ -28,11 +28,7 @@ Log into the instance using the IP address as host name (user name is `centos`).
 
 ### Install the required software
 
-To run the Rstudio server via docker we will require:
-
-* [Docker](https://www.docker.com/)
-* [docker-compose](https://github.com/docker/compose)
-* [conda](https://docs.conda.io/en/latest/miniconda.html) or [mamba](https://github.com/conda-forge/miniforge#mambaforge)
+To run the Rstudio server via docker we will require [Docker](https://www.docker.com/), [docker-compose](https://github.com/docker/compose), [conda](https://docs.conda.io/en/latest/miniconda.html) or [mamba](https://github.com/conda-forge/miniforge#mambaforge).
 
 This can be installed via ansible. Install ansible and other necessary software via yum:
 
