@@ -68,7 +68,7 @@ sudo groupadd docker
 sudo usermod -aG docker $USER
 ```
 
-Then log out and log back into the instance.
+> **_NOTE:_** Then log out and log back into the instance, after which you should be able to run `docker run hello-world` without using sudo.
 
 ### Start up rstudio server
 
