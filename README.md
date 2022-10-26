@@ -11,7 +11,7 @@ Start by creating a repository within `qbic-projects` from this template. For th
 Launch a deNBI instance with the following characteristics:
 
 * Details: name the instance
-* Source: Image and select CentOS image (e.g. CentOS 8.4)
+* Source: Image and select CentOS image (e.g. CentOS 7.9)
 * Flavour: Choose flavour (de.NBI medium should be fine for most analyses)
 * Networks: Select deNBI Tübingen external network
 * Security Groups: add `external_access` security group.
