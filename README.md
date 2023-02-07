@@ -10,13 +10,13 @@ Start by creating a repository within `qbic-projects` from this template. For th
 
 Launch a deNBI instance with the following characteristics:
 
-* Details: name the instance
-* Source: Image and select CentOS image (e.g. CentOS 7.9)
-* Flavour: Choose flavour (de.NBI medium should be fine for most analyses)
-* Networks: Select deNBI Tübingen external network
-* Security Groups: add `external_access` security group.
-* Key Pair: add your SSH key or generate a new one.
-* (Leave default in the rest of the fields)
+- Details: name the instance
+- Source: Image and select CentOS image (e.g. CentOS 7.9)
+- Flavour: Choose flavour (de.NBI medium should be fine for most analyses)
+- Networks: Select deNBI Tübingen external network
+- Security Groups: add `external_access` security group.
+- Key Pair: add your SSH key or generate a new one.
+- (Leave default in the rest of the fields)
 
 You will also need to create and attach a volume. There are step by step instructions for creating instances and attaching volumes on the [qbic pipeline docs page](https://pipeline-docs.readthedocs.io/en/latest/markdown/clusters/denbi_cloud.html).
 
@@ -34,6 +34,14 @@ This can be installed via ansible. Install ansible and other necessary software 
 
 ```bash
 sudo yum install epel-release ansible vim git wget -y
+sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+sudo yum install gh
+```
+
+Update dependencies:
+
+```bash
+sudo yum update
 ```
 
 Install necessary ansible roles (for docker, docker-compose and miniconda):
@@ -66,6 +74,8 @@ Post installation steps:
 ```bash
 sudo groupadd docker
 sudo usermod -aG docker $USER
+sudo chown -r centos:centos /home/centos/
+sudo chown -r centos:centos /mnt/volume/
 ```
 
 > **_NOTE:_** Then log out and log back into the instance, after which you should be able to run `docker run hello-world` without using sudo.
@@ -74,11 +84,11 @@ sudo usermod -aG docker $USER
 
 1. Build the rstudio container (fetches the latest version of [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio) and adds some custom scripts)
 
-   You can adapt the container name inside the docker-compose.yml file.
+   You can adapt the container name inside the `docker-compose.yml` file.
 
    ```bash
    cd r-project-template/rstudio-server-docker
-   docker-compose build     
+   docker-compose build
    ```
 
 2. Add the necessary dependencies in the `code/environment.yml` file and create the conda environment. Don't add rstudio in the environment file, this is already inside the container:
@@ -87,6 +97,8 @@ sudo usermod -aG docker $USER
    cd code
    conda env create -f environment.yml
    ```
+
+   > **_NOTE:_** In case of missing permissions for writing packages, run: `sudo chown -R $USER ~/.conda`
 
 3. Update if necessary the `docker-compose.yml` file to your project paths and conda environment name.
 
@@ -112,13 +124,22 @@ sudo usermod -aG docker $USER
 4. Run your project-specific instance of Rstudio-server
 
    ```bash
-   docker-compose up 
+   docker-compose up
    ```
 
 5. Log into Rstudio
 
-   * Open your server at `http://localhost:8889` (or whatever port you specified)
-   * Login with the user `rstudio` and the password you specified in the `docker-compose.yml`.
+   - There are two options, to ensure port forwarding works to your local machine:
+
+     1. Using Visual Studio code:
+        - `Terminal > New Terminal`
+        - Press the tab `Ports`
+        - Fill out the fields: `Port = 8889`, `Local address = localhost:8889`
+     2. Opening a _new_ terminal window:
+        - `ssh -L 8889:localhost:8889 user@host`
+
+   - Open your server at `http://localhost:8889` (or whatever port you specified)
+   - Login with the user `rstudio` and the password you specified in the `docker-compose.yml`.
 
 6. Browse into the `code` folder and update the code as necessary. Once finished, make sure to push the changes to a new repository.
 
