@@ -99,7 +99,9 @@ sudo chown -r centos:centos /mnt/volume/
    ```
 
    > **_NOTE:_** In case of missing permissions for writing packages, run: `sudo chown -R $USER ~/.conda`
-
+If you need to update the environment throughout the project, you can add the dependency to the file and run:
+```bash
+conda env update --file environment.yml --prune
 3. Update if necessary the `docker-compose.yml` file to your project paths and conda environment name.
 
    You may want to add additional volumes with your data.
