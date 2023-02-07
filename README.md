@@ -147,6 +147,7 @@ sudo chown -r centos:centos /mnt/volume/
         - Press the tab `Ports`
         - Fill out the fields: `Port = 8889`, `Local address = localhost:8889`
      2. Opening a _new_ terminal window:
+       - This requires a properly set up ssh config file under `~/.ssh/config`
         - `ssh -L 8889:localhost:8889 user@host`
 
    - Open your server at `http://localhost:8889` (or whatever port you specified)
