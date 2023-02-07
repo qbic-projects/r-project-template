@@ -74,6 +74,11 @@ Post installation steps:
 ```bash
 sudo groupadd docker
 sudo usermod -aG docker $USER
+# In case you have any permission problems make sure your user (centos) has the correct rights 
+# You can check this with:
+ls -l
+
+# change ownership only if necessary
 sudo chown -r centos:centos /home/centos/
 sudo chown -r centos:centos /mnt/volume/
 ```
