@@ -89,7 +89,7 @@ sudo chown -r centos:centos /mnt/volume/
 
 1. Build the rstudio container (fetches the latest version of [rocker/rstudio](https://hub.docker.com/r/rocker/rstudio) and adds some custom scripts)
 
-   You can adapt the container name inside the `docker-compose.yml` file. Also please adjust the conda environment name and file paths of your mounted volume.
+   You can adapt the container name inside the `docker-compose.yml` file.
 
    ```bash
    cd r-project-template/rstudio-server-docker
