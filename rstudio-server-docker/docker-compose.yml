@@ -7,12 +7,12 @@ services:
     ulimits:
       nofile: 10000
     ports:
-        - "8889:8787"
+      - "8889:8787"
     volumes:
       # mount conda env into exactly the same path as on the host system - some paths are hardcoded in the env.
       - /home/centos/.conda/envs/seurat-knitr:/home/centos/.conda/envs/seurat-knitr
       # mount the working directory containing your R project.
-      - /home/centos/r-project-template:/home/rstudio
+      - /home/centos/r-project-template:/home/rstudio/data
     environment:
       - PASSWORD=notsafe
       # repeat the path of the conda environment

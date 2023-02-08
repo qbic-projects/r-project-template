@@ -122,14 +122,17 @@ sudo chown -r centos:centos /mnt/volume/
          - "8889:8787"
        volumes:
          # mount conda env into exactly the same path as on the host system - some paths are hardcoded in the env.
-         - /home/centos/.conda/envs/seurat-knitr:/home/centos/.conda/envs/seurat-knitr
+         # TODO: Adapt conda environment name
+         - /home/centos/.conda/envs/<environment-name>:/home/centos/.conda/envs/<environment-name>
          # mount the working directory containing your R project.
-         - /home/centos/r-project-template:/home/rstudio
+         # TODO: adapt </home/centos/r-project-template> to the path your data and code is under
+         - /home/centos/r-project-template:/home/rstudio/data
        environment:
          # password used for authentication
          - PASSWORD=notsafe
          # repeat the path of the conda environment (must be identical to the path in "volumes")
-         - CONDAENV=/home/centos/.conda/envs/seurat-knitr
+         # TODO: Adapt conda environment name
+         - CONDAENV=/home/centos/.conda/envs/<environment-name>
    ```
 
 4. Run your project-specific instance of Rstudio-server
@@ -178,9 +181,9 @@ services:
         - "8889:8787"
     volumes:
       # mount the working directory containing your R project.
+      # TODO: adapt </home/centos/r-project-template> to the path your data and code is under
       - /mnt/volume/r-project-template/data:/home/rstudio/data
     environment:
-    # TODO: Fix this thing in the Dockerfile, password is hardcoded at the moment
       - PASSWORD=notsafe
 ```
 
@@ -228,7 +231,7 @@ RUN echo "R_LIBS_USER=${CONDA_DIR}/lib/R/library" > /home/rstudio/.Renviron
 
 # Set root password (with podman, we need to login as root rather than "rstudio")
 # Note: The passwort is currently set here
-RUN echo "root:notsafe"
+RUN echo "root:${PASSWORD}"
 RUN echo "auth-minimum-user-id=0" >> /etc/rstudio/rserver.conf
 
 # Custom settings
