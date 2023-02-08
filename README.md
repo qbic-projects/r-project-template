@@ -162,11 +162,11 @@ Credits: This setup for rstudio server using docker-compose is based on the setu
 
 ### Finalize your analysis
 
-Once the environment is completely setup and you don't plan to make changes anymore to the conda setup, it is time to build the container that natively includes the conda environment. The container can then be stored and used to reproduce any results later on.
+Once the environment is completely setup and you don't plan to make changes anymore to the conda environment, it is time to build the container that natively includes the conda environment. The container can then be stored and used to reproduce any results later on.
 
 For this, do the following steps:
 
-1. Update the `docker-compose.yml`. The conda environment does not need to be mounted anymore. The data volume however needs to be mounted to an existing path. If you change the mount point, it will require further updates in the Dockerfile:
+1. Update the `docker-compose.yml`: The conda environment does not need to be mounted anymore. The data volume however needs to be mounted to an existing path. If you change the mount point, it will require further updates in the Dockerfile:
 
 ```bash
 version: "3.8"
@@ -187,7 +187,7 @@ services:
       - PASSWORD=notsafe
 ```
 
-2. Update your `Dockerfile` bby copying below code and addressing the _TODO_ statements:
+2. Update your `Dockerfile` by copying below code and addressing the _TODO_ statements:
 
 ```bash
 FROM rocker/rstudio
@@ -261,4 +261,5 @@ docker-compose up
 and follow the steps described [above](#start-up-rstudio-server) in step 5.
 
 6. Push container to docker hub:
-   TODO: describe how and where to
+
+   > **_TODO_:\_**: describe how and where to
