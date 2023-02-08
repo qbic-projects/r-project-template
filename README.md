@@ -74,7 +74,7 @@ Post installation steps:
 ```bash
 sudo groupadd docker
 sudo usermod -aG docker $USER
-# In case you have any permission problems make sure your user (centos) has the correct rights 
+# In case you have any permission problems make sure your user (centos) has the correct rights
 # You can check this with:
 ls -l
 
@@ -155,3 +155,106 @@ sudo chown -r centos:centos /mnt/volume/
 6. Browse into the `code` folder and update the code as necessary. Once finished, make sure to push the changes to a new repository.
 
 Credits: This setup for rstudio server using docker-compose is based on the setup described by [@grst](github.com/grst) on [how to run an Rstudio server in a conda environment with docker](https://github.com/grst/rstudio-server-conda).
+
+### Finalize your analysis
+
+Once the environment is completely setup and you don't plan to make changes anymore to the conda setup, it is time to build the container that natively includes the conda environment. The container can then be stored and used to reproduce any results later on.
+
+For this, do the following steps:
+
+1. Update the `docker-compose.yml`. The conda environment does not need to be mounted anymore. The data volume however needs to be mounted to an existing path. If you change the mount point, it will require further updates in the Dockerfile:
+
+```bash
+version: "3.8"
+services:
+  rstudio:
+    build: .
+    # add the image name of your container
+    image: qbicprojects/rstudio-template:latest
+    ulimits:
+      nofile: 10000
+    ports:
+        - "8889:8787"
+    volumes:
+      # mount the working directory containing your R project.
+      - /mnt/volume/r-project-template/data:/home/rstudio/data
+    environment:
+    # TODO: Fix this thing in the Dockerfile, password is hardcoded at the moment
+      - PASSWORD=notsafe
+```
+
+2. Update your `Dockerfile` bby copying below code and addressing the _TODO_ statements:
+
+```bash
+FROM rocker/rstudio
+
+ENV ROOT=TRUE
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+
+# Create directory to mount data to
+# This path needs to be identical to the one your working directory is mounted to in the docker-compose.yml under 'volumes'
+RUN mkdir /home/rstudio/data
+
+# install dependencies
+RUN apt-get update --fix-missing \
+  && apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git \
+  && apt-get clean
+
+# install conda & setup conda environment
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/rstudio/miniconda.sh \
+    && bash /home/rstudio/miniconda.sh -b -p /home/rstudio/conda \
+    && rm -f /home/rstudio/miniconda.sh
+
+ENV CONDA_DIR /home/rstudio/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+RUN which conda
+RUN conda --version
+
+COPY environment.yml /
+RUN conda env create -f /environment.yml && conda clean -a -y
+
+RUN conda env list
+# TODO: Set the correct environment name
+ENV PATH=$CONDA_DIR/envs/<environment-name>/bin:$PATH
+
+# Settings required for conda+rstudio
+# TODO: Set the correct environment name
+ENV RSTUDIO_WHICH_R=${CONDA_DIR}/envs/<environment-name>/bin/R
+RUN echo rsession-which-r=${RSTUDIO_WHICH_R} > /etc/rstudio/rserver.conf
+RUN echo rsession-ld-library-path=${CONDA_DIR}/lib >> /etc/rstudio/rserver.conf
+RUN echo "R_LIBS_USER=${CONDA_DIR}/lib/R/library" > /home/rstudio/.Renviron
+
+# Set root password (with podman, we need to login as root rather than "rstudio")
+# Note: The passwort is currently set here
+RUN echo "root:notsafe"
+RUN echo "auth-minimum-user-id=0" >> /etc/rstudio/rserver.conf
+
+# Custom settings
+RUN echo "session-timeout-minutes=0" > /etc/rstudio/rsession.conf
+RUN echo "auth-timeout-minutes=0" >> /etc/rstudio/rserver.conf
+RUN echo "auth-stay-signed-in-days=30" >> /etc/rstudio/rserver.conf
+
+CMD ["/init"]
+```
+
+3. Copy the `environment.yml` to the folder `r-studio-server-docker` (where the `Dockerfile` and `docker-compose.yml` are)
+
+4. Execute:
+
+```bash
+docker-compose build
+```
+
+to create this new docker file.
+
+5. To open Rstudio and continue coding and run your analysis with the final container:
+
+```bash
+docker-compose up
+```
+
+and follow the steps described [above](#start-up-rstudio-server) in step 5.
+
+6. Push container to docker hub:
+   TODO: describe how and where to
