@@ -230,7 +230,6 @@ RUN echo rsession-ld-library-path=${CONDA_DIR}/lib >> /etc/rstudio/rserver.conf
 RUN echo "R_LIBS_USER=${CONDA_DIR}/lib/R/library" > /home/rstudio/.Renviron
 
 # Set root password (with podman, we need to login as root rather than "rstudio")
-# Note: The passwort is currently set here
 RUN echo "root:${PASSWORD}"
 RUN echo "auth-minimum-user-id=0" >> /etc/rstudio/rserver.conf
 
