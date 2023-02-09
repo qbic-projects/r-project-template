@@ -249,6 +249,10 @@ CMD ["/init"]
 docker-compose build
 ```
 
+> **_Note_**: It might be necessary to remove any previous built and cached containers. This can be done with: `docker rm $(docker ps -a -q); docker rmi $(docker images -q); docker system prune`.
+
+> :warning: This command removes _all_ local containers and images! Use with caution, if you have multiple projects setup on one denbi instance.
+
 to create this new docker file.
 
 5. To open Rstudio and continue coding and run your analysis with the final container:
