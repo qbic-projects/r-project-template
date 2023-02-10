@@ -80,7 +80,7 @@ ls -l
 
 # change ownership only if necessary
 sudo chown -R centos:centos /home/centos/
-sudo chown -r centos:centos /mnt/volume/
+sudo chown -R centos:centos /mnt/volume/
 ```
 
 > **_NOTE:_** Then log out and log back into the instance, after which you should be able to run `docker run hello-world` without using sudo.
