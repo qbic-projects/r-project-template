@@ -79,7 +79,7 @@ sudo usermod -aG docker $USER
 ls -l
 
 # change ownership only if necessary
-sudo chown -r centos:centos /home/centos/
+sudo chown -R centos:centos /home/centos/
 sudo chown -r centos:centos /mnt/volume/
 ```
 
