@@ -103,7 +103,7 @@ sudo chown -R centos:centos /mnt/volume/
    conda env create -f environment.yml
    ```
 
-   > **_NOTE:_** In case of missing permissions for writing packages, run: `sudo chown -R $USER ~/.conda`
+   > **_NOTE:_** In case of missing permissions for writing packages, run: `sudo chown -R $USER $CONDA_PREFIX`
 
    If you need to update the environment throughout the project, you can add the dependency to the file and run:
 
