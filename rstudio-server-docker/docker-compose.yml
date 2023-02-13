@@ -17,4 +17,5 @@ services:
     environment:
       - PASSWORD=notsafe
       # repeat the path of the conda environment
-      - CONDAENV=/home/centos/.conda/envs/seurat-knitr
+      # TODO adjust to your environment name
+      - CONDAENV=$CONDA_PREFIX/envs/seurat-knitr
