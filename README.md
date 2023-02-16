@@ -122,7 +122,7 @@ sudo chown -R centos:centos /mnt/volume/
          - "8889:8787"
        volumes:
          # mount conda env into exactly the same path as on the host system - some paths are hardcoded in the env.
-         # TODO: Adapt conda environment name
+         # TODO: Adapt conda environment name. You can check where you conda environment is installed by running `conda env list` 
          - /home/centos/.conda/envs/<environment-name>:/home/centos/.conda/envs/<environment-name>
          # mount the working directory containing your R project.
          # TODO: adapt </home/centos/r-project-template> to the path your data and code is under
